@@ -1,75 +1,82 @@
 package uibk.autonom.ps.colorbasedtracking;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfPoint;
+import org.opencv.core.MatOfPoint2f;
+import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
-import android.util.Log;
-
 public class ColorDetector {
 	
-	private Scalar trackColor;
-	
-	public ColorDetector(){
-		trackColor = new Scalar(255, 0, 0);
-	}
+	private Scalar lowerColorLimit = new Scalar(0);
+    private Scalar upperColorLimit = new Scalar(0);
+    
+    private Mat outputFrame;
 	
 	public Mat detect(Mat inputFrame){
-		Mat outputFrame = inputFrame.clone();
-		
-		double[] black = {0, 0, 0, 0};
-		double[] white = {255, 255, 255, 255};
-		
-		int rows = inputFrame.rows();
-		int cols = inputFrame.cols();
-		
-		for(int i = 0; i < rows; i++){
-			for(int j = 0; j < cols; j++){
-				double[] color = inputFrame.get(i, j);
-				
-				double absVal = 255 - color[0];
-				double absVal1 = 255 - color[1];
-				double absVal2 = 255 - color[2];
-				
-				if(absVal > 30 || absVal1 > 30 || absVal2 > 30){
-					outputFrame.put(i, j, black);
-				}else{
-					outputFrame.put(i, j, white);
-				}
-				
-				
-			}
-		}
-		
-		return outputFrame;
-	}
-	
-	public Mat detecdt(Mat inputFrame){
-		Mat outputFrame = new Mat();
 		Mat calcFrame = new Mat();
-		//outputFrame = compress(inputFrame);
 		
-		//Imgproc.cvtColor(inputFrame, calcFrame, Imgproc.COLOR_RGB2HSV_FULL);
+		Imgproc.cvtColor(inputFrame, calcFrame, Imgproc.COLOR_RGB2HSV);
 		
-		Core.absdiff(inputFrame, trackColor, calcFrame);
-		Imgproc.threshold(calcFrame, outputFrame, 0, 255, Imgproc.THRESH_BINARY);
-		
-		//outputFrame.get
+		outputFrame = new Mat();
+		Core.inRange(calcFrame, lowerColorLimit, upperColorLimit, outputFrame);
 		
 		return outputFrame;
 	}
 	
-	private Mat compress(Mat inputFrame){
-		Mat outputFrame = new Mat();
-		
-		Imgproc.pyrDown(inputFrame, outputFrame);
-        Imgproc.pyrDown(outputFrame, outputFrame);
+	public List<MatOfPoint> getMaxContour() {
+		List<MatOfPoint> contours = getContours();
+		        
+        // Find max contour area
+        double maxArea = 0;
+        MatOfPoint maxAreaPoints = new MatOfPoint();
+        Iterator<MatOfPoint> each = contours.iterator();
         
-        return outputFrame;
+        while (each.hasNext()) {
+            MatOfPoint wrapper = each.next();
+            double area = Imgproc.contourArea(wrapper);
+            
+            if (area > maxArea){
+                maxArea = area;
+                maxAreaPoints = wrapper;
+            }
+        }
+        
+        ArrayList<MatOfPoint> returnList = new ArrayList<MatOfPoint>();
+        returnList.add(maxAreaPoints);
+        
+        return returnList;
+    }
+	
+	public List<MatOfPoint> getContours() {
+		List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
+
+        Imgproc.findContours(outputFrame, contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
+        
+        return contours;
+    }
+	
+	
+	public Point getCenterPoint(MatOfPoint contour){
+		float[] radius = null;
+		Point centerPoint = new Point();
+		
+        MatOfPoint2f pointsList = new MatOfPoint2f();
+
+        // TODO add points!!!
+        
+		Imgproc.minEnclosingCircle(pointsList, centerPoint, radius);
+        
+		return centerPoint;
 	}
 	
-	public void setTrackColor(Scalar trackColor){
-		this.trackColor = trackColor;
+	public void setHsvColor(Scalar hsvColor){
+		ColorConverter.getHsvColorRange(hsvColor, lowerColorLimit, upperColorLimit);
 	}
 }
