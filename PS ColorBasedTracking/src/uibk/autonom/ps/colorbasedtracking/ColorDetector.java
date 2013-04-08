@@ -27,10 +27,12 @@ public class ColorDetector {
 		outputFrame = new Mat();
 		Core.inRange(calcFrame, lowerColorLimit, upperColorLimit, outputFrame);
 		
+		calcFrame.release();
+		
 		return outputFrame;
 	}
 	
-	public List<MatOfPoint> getMaxContour() {
+	public MatOfPoint getMaxContour() {
 		List<MatOfPoint> contours = getContours();
 		        
         // Find max contour area
@@ -48,28 +50,29 @@ public class ColorDetector {
             }
         }
         
-        ArrayList<MatOfPoint> returnList = new ArrayList<MatOfPoint>();
-        returnList.add(maxAreaPoints);
-        
-        return returnList;
+        return maxAreaPoints;
     }
 	
 	public List<MatOfPoint> getContours() {
 		List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
 
-        Imgproc.findContours(outputFrame, contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
+		Mat calcFrame = outputFrame.clone();
+        Imgproc.findContours(calcFrame, contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
+        calcFrame.release();
         
         return contours;
     }
 	
 	
+	public Point getCenterPoint(){
+		return getCenterPoint(getMaxContour());
+	}
+	
 	public Point getCenterPoint(MatOfPoint contour){
 		float[] radius = null;
 		Point centerPoint = new Point();
 		
-        MatOfPoint2f pointsList = new MatOfPoint2f();
-
-        // TODO add points!!!
+        MatOfPoint2f pointsList = new MatOfPoint2f(contour.toArray());
         
 		Imgproc.minEnclosingCircle(pointsList, centerPoint, radius);
         

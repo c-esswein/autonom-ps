@@ -1,5 +1,6 @@
 package uibk.autonom.ps.colorbasedtracking;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.opencv.android.BaseLoaderCallback;
@@ -106,11 +107,16 @@ public class MainActivity extends Activity implements OnTouchListener, CvCameraV
 
 		if (isColorSelected) {
 			currentRgba = colorDetector.detect(currentRgba);
+			
+			Point center = colorDetector.getCenterPoint();
+			Log.i(DEBUG_TAG, "center Point:" + center);
 
+			//Imgproc.cvtColor(currentRgba, currentRgba, Imgproc.COLOR_RGB2HSV);
+			
 			Core.rectangle(currentRgba, 
-					new Point(100.0, 100.0), 
-					new Point(120.0, 120.0), 
-					new Scalar(255, 0, 0, 255));
+					new Point(center.x - 25, center.y - 25), 
+					new Point(center.x + 25, center.y + 25), 
+					new Scalar(0, 0, 0, 0));
 		}
 		
 		return currentRgba;
@@ -123,9 +129,9 @@ public class MainActivity extends Activity implements OnTouchListener, CvCameraV
 		if (isColorSelected) {
 			currentRgba = colorDetector.detect(currentRgba);
 			
-			
 			Scalar CONTOUR_COLOR = new Scalar(255, 0, 0, 255);
-			List<MatOfPoint> contours = colorDetector.getMaxContour();
+			List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
+			contours.add(colorDetector.getMaxContour());
             Imgproc.drawContours(orgImage, contours, -1, CONTOUR_COLOR);
 			
 		}

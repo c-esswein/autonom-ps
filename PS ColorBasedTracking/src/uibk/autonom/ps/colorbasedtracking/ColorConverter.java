@@ -5,7 +5,7 @@ import org.opencv.core.Scalar;
 public class ColorConverter {
 
 	// Color radius for range checking in HSV color space
-    private static Scalar mColorRadius = new Scalar(25,50,50,0);
+    private static Scalar mColorRadius = new Scalar(40, 60, 60, 0);
     
     public static void getHsvColorRange(Scalar hsvColor, Scalar lowerBound, Scalar upperBound) {
         double minH = (hsvColor.val[0] >= mColorRadius.val[0]) ? hsvColor.val[0]-mColorRadius.val[0] : 0;
