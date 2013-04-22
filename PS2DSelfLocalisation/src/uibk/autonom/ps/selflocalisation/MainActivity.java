@@ -1,6 +1,5 @@
 package uibk.autonom.ps.selflocalisation;
 
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,38 +21,33 @@ import ioio.lib.api.DigitalInput;
 import ioio.lib.api.DigitalOutput;
 import ioio.lib.api.PwmOutput;
 import ioio.lib.api.TwiMaster;
-import ioio.lib.api.exception.ConnectionLostException;
-import ioio.lib.util.BaseIOIOLooper;
 import ioio.lib.util.IOIOLooper;
 import ioio.lib.util.android.IOIOActivity;
 
+import uibk.autonom.ps.robot.Robot;
 import uibk.autonom.ps.selflocalisation.R;
 import uibk.autonom.ps.selflocalisation.colordetector.ColorDetector;
 import uibk.autonom.ps.selflocalisation.colordetector.ColorSelector;
 
+import android.content.Context;
 import android.os.Bundle;
-import android.os.Message;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.View.OnTouchListener;
-import android.widget.SeekBar;
-import android.widget.SeekBar.OnSeekBarChangeListener;
+import android.widget.Toast;
 
 public class MainActivity extends IOIOActivity implements OnTouchListener, CvCameraViewListener2 {
 	private static final String DEBUG_TAG = "PS CBT:";
+	
+	private static Context context;
 	
 	private Mat currentRgba;
 	private boolean isColorSelected = false;
 	private CameraBridgeViewBase mOpenCvCameraView;
 	private ColorDetector colorDetector;
 	private ColorSelector colorSelector;
-	
-	private DigitalOutput led_;
-	private PwmOutput servo_;
-	private DigitalInput lint_;
-	private TwiMaster twi;
 	
 	private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
 		 @Override
@@ -81,6 +75,8 @@ public class MainActivity extends IOIOActivity implements OnTouchListener, CvCam
 	
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		
+		context = this.getApplicationContext();
 		
 		setContentView(R.layout.main_view);
 		
@@ -171,6 +167,10 @@ public class MainActivity extends IOIOActivity implements OnTouchListener, CvCam
 		
 		return false;
     }
+	
+	public static void showMessage(String msg){
+		Toast.makeText(context, msg, Toast.LENGTH_SHORT).show();
+	}
 
 	/**
 	 * A method to create our IOIO thread.
@@ -178,9 +178,9 @@ public class MainActivity extends IOIOActivity implements OnTouchListener, CvCam
 	 * @see ioio.lib.util.AbstractIOIOActivity#createIOIOThread()
 	 */
 	@Override
-	protected IOIOLooper createIOIOLooper()
-	{
+	protected IOIOLooper createIOIOLooper()	{
 		return new Looper();
 	}
+ 
 
 }

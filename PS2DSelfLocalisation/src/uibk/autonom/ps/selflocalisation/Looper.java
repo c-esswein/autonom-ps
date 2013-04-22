@@ -1,10 +1,10 @@
 package uibk.autonom.ps.selflocalisation;
 
+import uibk.autonom.ps.robot.RobotConnector;
 import ioio.lib.api.DigitalInput;
 import ioio.lib.api.TwiMaster;
 import ioio.lib.api.exception.ConnectionLostException;
 import ioio.lib.util.BaseIOIOLooper;
-import android.util.Log;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 
@@ -31,7 +31,7 @@ public class Looper extends BaseIOIOLooper implements OnSeekBarChangeListener
 	@Override
 	protected void setup() throws ConnectionLostException
 	{
-
+		RobotConnector.getInstance().setIOIO(ioio_);
 	}
 
 	/**
