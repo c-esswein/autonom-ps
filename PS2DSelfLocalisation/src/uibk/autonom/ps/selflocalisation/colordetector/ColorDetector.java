@@ -1,4 +1,4 @@
-package uibk.autonom.ps.selflocalisation;
+package uibk.autonom.ps.selflocalisation.colordetector;
 
 import java.util.ArrayList;
 import java.util.Iterator;

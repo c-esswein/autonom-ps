@@ -1,4 +1,4 @@
-package uibk.autonom.ps.selflocalisation;
+package uibk.autonom.ps.selflocalisation.colordetector;
 
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
