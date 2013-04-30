@@ -22,6 +22,7 @@ import uibk.autonom.ps.colordetector.ColorDetector;
 import uibk.autonom.ps.colordetector.ColorSelector;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -47,6 +48,8 @@ public class MainActivity extends IOIOActivity implements OnTouchListener, CvCam
 	private boolean showFiltered = false;
 	
 	private Locator locator;
+	
+	private boolean debugFlag = false;
 	
 	private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
 		 @Override
@@ -97,6 +100,9 @@ public class MainActivity extends IOIOActivity implements OnTouchListener, CvCam
 			showMessage("Kamera wurde kalibriert!");
 			return true;
 		case R.id.settings:
+			debugFlag = true;
+			//Intent myIntent = new Intent(this.getApplicationContext(), SettingsActivity.class);
+	        //startActivityForResult(myIntent, 0);
 			
 			return true;
 		case R.id.view_mode:
@@ -156,17 +162,22 @@ public class MainActivity extends IOIOActivity implements OnTouchListener, CvCam
 					colorDetector.detect(currentRgba);					
 				}
 	
-				//List<Point> centers = colorDetector.getBottomPoints(2);
-				List<Point> centers = colorDetector.getCenterPoints(4);
+				List<Point> centers = colorDetector.getBottomPoints(1);
 	
 				for (Point p : centers) {
 					Core.rectangle(currentRgba, new Point(p.x - 10, p.y - 10),
 							new Point(p.x + 10, p.y + 10), new Scalar(255, 0,
 									255, 0));
+					
+					if(debugFlag){
+						debugFlag = false;
+						Log.i(DEBUG_TAG, "center point image coords:" + p.toString());
+						Log.i(DEBUG_TAG, "center point world coords:" + locator.img2World(p));
+					}
 				}
 				
 			} catch (Exception ex) {
-				Log.i(DEBUG_TAG, "exception: " + ex.getMessage());
+				Log.i(DEBUG_TAG, "exception: " + ex);
 			}
 		}
 		
