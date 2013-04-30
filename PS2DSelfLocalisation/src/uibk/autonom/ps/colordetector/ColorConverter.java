@@ -1,11 +1,11 @@
-package uibk.autonom.ps.selflocalisation.colordetector;
+package uibk.autonom.ps.colordetector;
 
 import org.opencv.core.Scalar;
 
 public class ColorConverter {
 
 	// Color radius for range checking in HSV color space
-    private static Scalar mColorRadius = new Scalar(40, 60, 60, 0);
+	private static Scalar mColorRadius = new Scalar(40, 45, 45, 0);
     
     public static void getHsvColorRange(Scalar hsvColor, Scalar lowerBound, Scalar upperBound) {
         double minH = (hsvColor.val[0] >= mColorRadius.val[0]) ? hsvColor.val[0]-mColorRadius.val[0] : 0;

@@ -1,6 +1,5 @@
 package uibk.autonom.ps.selflocalisation;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.opencv.android.BaseLoaderCallback;
@@ -12,26 +11,22 @@ import org.opencv.android.CameraBridgeViewBase.CvCameraViewListener2;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
-import org.opencv.core.MatOfPoint;
 import org.opencv.core.Point;
 import org.opencv.core.Scalar;
-import org.opencv.imgproc.Imgproc;
 
-import ioio.lib.api.DigitalInput;
-import ioio.lib.api.DigitalOutput;
-import ioio.lib.api.PwmOutput;
-import ioio.lib.api.TwiMaster;
 import ioio.lib.util.IOIOLooper;
 import ioio.lib.util.android.IOIOActivity;
 
-import uibk.autonom.ps.robot.Robot;
 import uibk.autonom.ps.selflocalisation.R;
-import uibk.autonom.ps.selflocalisation.colordetector.ColorDetector;
-import uibk.autonom.ps.selflocalisation.colordetector.ColorSelector;
+import uibk.autonom.ps.colordetector.ColorDetector;
+import uibk.autonom.ps.colordetector.ColorSelector;
 
 import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.SurfaceView;
 import android.view.View;
@@ -44,10 +39,14 @@ public class MainActivity extends IOIOActivity implements OnTouchListener, CvCam
 	private static Context context;
 	
 	private Mat currentRgba;
-	private boolean isColorSelected = false;
+	private Scalar currentSelectedColor = null;
 	private CameraBridgeViewBase mOpenCvCameraView;
+	
 	private ColorDetector colorDetector;
 	private ColorSelector colorSelector;
+	private boolean showFiltered = false;
+	
+	private Locator locator;
 	
 	private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
 		 @Override
@@ -66,13 +65,8 @@ public class MainActivity extends IOIOActivity implements OnTouchListener, CvCam
              }
          }
     };
-	
-    @Override
-    public void onResume(){
-        super.onResume();
-        OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_2_4_3, this, mLoaderCallback);
-    }
-	
+    
+
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
@@ -85,7 +79,39 @@ public class MainActivity extends IOIOActivity implements OnTouchListener, CvCam
         mOpenCvCameraView.setCvCameraViewListener(this);
         
         colorDetector = new ColorDetector();
+        locator = new Locator();
 	}
+    
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu)	{
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.menu, menu);
+		return true;
+	}
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item)	{
+		switch (item.getItemId()) {
+		case R.id.calibrate:
+			locator.calibrate(currentRgba, currentSelectedColor);
+			showMessage("Kamera wurde kalibriert!");
+			return true;
+		case R.id.settings:
+			
+			return true;
+		case R.id.view_mode:
+			showFiltered = !showFiltered;
+			return true;
+		default:
+			return super.onOptionsItemSelected(item);
+		}
+	}
+	
+    @Override
+    public void onResume(){
+        super.onResume();
+        OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_2_4_3, this, mLoaderCallback);
+    }
 	
 	 @Override
 	 public void onPause(){
@@ -118,51 +144,40 @@ public class MainActivity extends IOIOActivity implements OnTouchListener, CvCam
 		
 	}
 
-	@Override
+	@Override	
 	public Mat onCameraFrame(CvCameraViewFrame inputFrame) {
 		currentRgba = inputFrame.rgba();
-
-		if (isColorSelected) {
-			currentRgba = colorDetector.detect(currentRgba);
-			
-			Point center = colorDetector.getCenterPoint();
-			Log.i(DEBUG_TAG, "center Point:" + center);
-
-			//Imgproc.cvtColor(currentRgba, currentRgba, Imgproc.COLOR_RGB2HSV);
-			
-			Core.rectangle(currentRgba, 
-					new Point(center.x - 25, center.y - 25), 
-					new Point(center.x + 25, center.y + 25), 
-					new Scalar(0, 0, 0, 0));
+		
+		if (currentSelectedColor != null) {
+			try {
+				if(showFiltered){
+					currentRgba = colorDetector.detect(currentRgba);
+				}else{
+					colorDetector.detect(currentRgba);					
+				}
+	
+				//List<Point> centers = colorDetector.getBottomPoints(2);
+				List<Point> centers = colorDetector.getCenterPoints(4);
+	
+				for (Point p : centers) {
+					Core.rectangle(currentRgba, new Point(p.x - 10, p.y - 10),
+							new Point(p.x + 10, p.y + 10), new Scalar(255, 0,
+									255, 0));
+				}
+				
+			} catch (Exception ex) {
+				Log.i(DEBUG_TAG, "exception: " + ex.getMessage());
+			}
 		}
 		
 		return currentRgba;
 	}
 	
-	public Mat onCameraFrame_contours(CvCameraViewFrame inputFrame) {
-		currentRgba = inputFrame.rgba();
-		Mat orgImage = inputFrame.rgba().clone();
-		
-		if (isColorSelected) {
-			currentRgba = colorDetector.detect(currentRgba);
-			
-			Scalar CONTOUR_COLOR = new Scalar(255, 0, 0, 255);
-			List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
-			contours.add(colorDetector.getMaxContour());
-            Imgproc.drawContours(orgImage, contours, -1, CONTOUR_COLOR);
-			
-		}
-		
-		return orgImage;
-	}
-	
 	public boolean onTouch(View v, MotionEvent event) {
-		Scalar newColor = null;
 		
-		newColor = colorSelector.Select(currentRgba, (int)event.getX(), (int)event.getY());
-		if(newColor != null){
-			colorDetector.setHsvColor(newColor);
-			isColorSelected = true;			
+		currentSelectedColor = colorSelector.Select(currentRgba, (int)event.getX(), (int)event.getY());
+		if(currentSelectedColor != null){
+			colorDetector.setHsvColor(currentSelectedColor);	
 		}
 		
 		return false;
