@@ -1,9 +1,7 @@
 package uibk.autonom.ps.selflocalisation;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Vector;
 
 import org.opencv.calib3d.Calib3d;
 import org.opencv.core.Core;
@@ -12,12 +10,9 @@ import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
-import org.opencv.core.Point3;
 import org.opencv.core.Scalar;
-import org.opencv.imgproc.Imgproc;
-import org.opencv.utils.Converters;
 
-import android.R.color;
+import android.util.Log;
 
 import uibk.autonom.ps.colordetector.ColorDetector;
 
@@ -43,6 +38,8 @@ public class Locator {
 		dstPoints = getDstPoints();
 		
 		H = Calib3d.findHomography(srcPoints, dstPoints);
+		
+		Log.i(MainActivity.DEBUG_TAG, "H: " + H.dump());
 	}
 	
 	private MatOfPoint2f sortSrcPoints(List<Point> imgPoints){		
@@ -66,6 +63,11 @@ public class Locator {
 			}
 		}
 		
+		Log.i(MainActivity.DEBUG_TAG, "Fixed Points:");
+		for(int i = 0; i < 4; i++){
+			Log.i(MainActivity.DEBUG_TAG, "Point" + i + ": " + points[i]);
+		}
+		
 		return new MatOfPoint2f(points);
 	}
 	
@@ -85,36 +87,17 @@ public class Locator {
 	}
 	
 	public String img2World(Point p){		
-		Mat srcMat = new Mat(4,1,CvType.CV_32FC2);
-		Mat destMat = new Mat(4,1,CvType.CV_32FC2);
+		Mat srcMat = new Mat(1, 1, CvType.CV_32FC2);
+		Mat destMat = new Mat(1, 1, CvType.CV_32FC2);
 
 		srcMat.put(0, 0, new double[] {p.x, p.y});
+		
+		Log.i(MainActivity.DEBUG_TAG, srcMat.dump());
 
 		Core.perspectiveTransform(srcMat, destMat, H);
 		
 		// TODO return point
 		
 		return destMat.dump();
-	}
-	
-	public String img2World2(Point p){
-		MatOfPoint srcMat = new MatOfPoint();
-		MatOfPoint destMat;
-		
-		List<Point> pointsList = new LinkedList<Point>();
-		pointsList.add(p);
-		srcMat.fromList(pointsList);
-		
-		destMat = new MatOfPoint(srcMat.clone());
-		
-		Core.perspectiveTransform(srcMat, destMat, H);
-		
-		pointsList = destMat.toList();
-		String returnS = "";
-		for(Point pDst : pointsList){
-			returnS += "Point: " + pDst;
-		}
-		
-		return returnS;
 	}
 }

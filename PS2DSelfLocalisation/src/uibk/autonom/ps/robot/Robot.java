@@ -1,7 +1,5 @@
 package uibk.autonom.ps.robot;
 
-import ioio.lib.api.exception.ConnectionLostException;
-
 public class Robot {
 	protected RobotConnector robotConnector;
 	

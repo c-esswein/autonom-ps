@@ -55,4 +55,8 @@ public class ColorSelector {
         return blobColorHsv;
 	}
 	
+	public int[] removeOffset(int x, int y){ // TODO title ^^
+		return new int[] {x- imageXOffset, y - imageYOffset};
+	}
+	
 }

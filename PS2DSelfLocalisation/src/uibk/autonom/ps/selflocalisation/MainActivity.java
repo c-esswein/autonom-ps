@@ -17,6 +17,7 @@ import org.opencv.core.Scalar;
 import ioio.lib.util.IOIOLooper;
 import ioio.lib.util.android.IOIOActivity;
 
+import uibk.autonom.ps.robot.Robot;
 import uibk.autonom.ps.selflocalisation.R;
 import uibk.autonom.ps.colordetector.ColorDetector;
 import uibk.autonom.ps.colordetector.ColorSelector;
@@ -35,7 +36,7 @@ import android.view.View.OnTouchListener;
 import android.widget.Toast;
 
 public class MainActivity extends IOIOActivity implements OnTouchListener, CvCameraViewListener2 {
-	private static final String DEBUG_TAG = "PS CBT:";
+	public static final String DEBUG_TAG = "PS CBT:";
 	
 	private static Context context;
 	
@@ -162,18 +163,12 @@ public class MainActivity extends IOIOActivity implements OnTouchListener, CvCam
 					colorDetector.detect(currentRgba);					
 				}
 	
-				List<Point> centers = colorDetector.getBottomPoints(1);
+				List<Point> centers = colorDetector.getCenterPoints(4);
 	
 				for (Point p : centers) {
 					Core.rectangle(currentRgba, new Point(p.x - 10, p.y - 10),
 							new Point(p.x + 10, p.y + 10), new Scalar(255, 0,
 									255, 0));
-					
-					if(debugFlag){
-						debugFlag = false;
-						Log.i(DEBUG_TAG, "center point image coords:" + p.toString());
-						Log.i(DEBUG_TAG, "center point world coords:" + locator.img2World(p));
-					}
 				}
 				
 			} catch (Exception ex) {
@@ -189,6 +184,16 @@ public class MainActivity extends IOIOActivity implements OnTouchListener, CvCam
 		currentSelectedColor = colorSelector.Select(currentRgba, (int)event.getX(), (int)event.getY());
 		if(currentSelectedColor != null){
 			colorDetector.setHsvColor(currentSelectedColor);	
+		}
+				
+		if(debugFlag){
+			debugFlag = false;
+			int[] cords = colorSelector.removeOffset((int)event.getX(), (int)event.getY());
+			Log.i(DEBUG_TAG, "center point image coords:" + cords[0] + " - " + cords[1]);
+			Log.i(DEBUG_TAG, "center point world coords:" + locator.img2World(new Point(cords[0], cords[1])));
+			
+			Robot robot = new Robot();
+			robot.moveFoward(cords[0]);
 		}
 		
 		return false;
