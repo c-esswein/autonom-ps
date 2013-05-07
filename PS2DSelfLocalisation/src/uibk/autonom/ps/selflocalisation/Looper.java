@@ -1,8 +1,6 @@
 package uibk.autonom.ps.selflocalisation;
 
 import uibk.autonom.ps.robot.RobotConnector;
-import ioio.lib.api.DigitalInput;
-import ioio.lib.api.TwiMaster;
 import ioio.lib.api.exception.ConnectionLostException;
 import ioio.lib.util.BaseIOIOLooper;
 import android.widget.SeekBar;

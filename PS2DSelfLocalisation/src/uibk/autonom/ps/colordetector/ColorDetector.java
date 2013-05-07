@@ -54,7 +54,7 @@ public class ColorDetector {
 		// sort the keys
 		Collections.sort(keys);
 
-		for(int i=keys.size()-1;i>keys.size()-(count+1);i--)
+		for(int i=keys.size()-1; i > keys.size()-(count+1); i--)
 			tmp_list.add(maxAreaPoints.get(keys.get(i)));
 
 		return tmp_list;

@@ -35,13 +35,14 @@ import android.view.View;
 import android.view.View.OnTouchListener;
 import android.widget.Toast;
 
-public class MainActivity extends IOIOActivity implements OnTouchListener, CvCameraViewListener2 {
+public class MainActivity extends IOIOActivity implements OnTouchListener, CvCameraViewListener2, CenterPointProvider {
 	public static final String DEBUG_TAG = "PS CBT:";
 	
 	private static Context context;
 	
 	private Mat currentRgba;
 	private Scalar currentSelectedColor = null;
+	private Point curCenterPoint = null;
 	private CameraBridgeViewBase mOpenCvCameraView;
 	
 	private ColorDetector colorDetector;
@@ -51,6 +52,11 @@ public class MainActivity extends IOIOActivity implements OnTouchListener, CvCam
 	private Locator locator;
 	
 	private boolean debugFlag = false;
+	
+	public enum States{START, CALIBRATED, SUB_PROG};
+	public States curState = States.START;
+	
+	private SubProgramm curSubProgramm = null;
 	
 	private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
 		 @Override
@@ -97,17 +103,43 @@ public class MainActivity extends IOIOActivity implements OnTouchListener, CvCam
 	public boolean onOptionsItemSelected(MenuItem item)	{
 		switch (item.getItemId()) {
 		case R.id.calibrate:
-			locator.calibrate(currentRgba, currentSelectedColor);
+			Calibrator calibrator = new Calibrator();
+			locator.calibrate(calibrator.calibrate(currentRgba, currentSelectedColor));
 			showMessage("Kamera wurde kalibriert!");
+			
+			curState = States.CALIBRATED;
+			
+			return true;
+		case R.id.catch_ball:
+			
+			showMessage("Start in 3sec!");
+			/*try {
+				Thread.sleep(3000L);
+			} catch (InterruptedException e) {}*/
+			//showMessage("Started!");
+			
+			curState = States.SUB_PROG;
+			curSubProgramm = new BallCatcher(locator, this); 
+			
 			return true;
 		case R.id.settings:
-			debugFlag = true;
 			//Intent myIntent = new Intent(this.getApplicationContext(), SettingsActivity.class);
 	        //startActivityForResult(myIntent, 0);
+			debugFlag = !debugFlag;
+			
+			Robot robot = new Robot();
+			
+			 if(debugFlag){
+				 robot.pullUpCager();
+				 showMessage("pullUp");
+			 }else{
+				 robot.letDownCager();
+			 }
 			
 			return true;
 		case R.id.view_mode:
 			showFiltered = !showFiltered;
+			
 			return true;
 		default:
 			return super.onOptionsItemSelected(item);
@@ -154,6 +186,7 @@ public class MainActivity extends IOIOActivity implements OnTouchListener, CvCam
 	@Override	
 	public Mat onCameraFrame(CvCameraViewFrame inputFrame) {
 		currentRgba = inputFrame.rgba();
+		List<Point> centers;
 		
 		if (currentSelectedColor != null) {
 			try {
@@ -163,12 +196,18 @@ public class MainActivity extends IOIOActivity implements OnTouchListener, CvCam
 					colorDetector.detect(currentRgba);					
 				}
 	
-				List<Point> centers = colorDetector.getCenterPoints(4);
+				if(curState == States.START){
+					centers = colorDetector.getCenterPoints(4);
+				}else{
+					centers = colorDetector.getCenterPoints(1);
+				}
 	
 				for (Point p : centers) {
 					Core.rectangle(currentRgba, new Point(p.x - 10, p.y - 10),
 							new Point(p.x + 10, p.y + 10), new Scalar(255, 0,
 									255, 0));
+					
+					curCenterPoint = p;
 				}
 				
 			} catch (Exception ex) {
@@ -189,11 +228,14 @@ public class MainActivity extends IOIOActivity implements OnTouchListener, CvCam
 		if(debugFlag){
 			debugFlag = false;
 			int[] cords = colorSelector.removeOffset((int)event.getX(), (int)event.getY());
+			Point realWorld = locator.img2World(new Point(cords[0], cords[1]));
 			Log.i(DEBUG_TAG, "center point image coords:" + cords[0] + " - " + cords[1]);
-			Log.i(DEBUG_TAG, "center point world coords:" + locator.img2World(new Point(cords[0], cords[1])));
+			Log.i(DEBUG_TAG, "center point world coords:" + realWorld);
 			
-			Robot robot = new Robot();
-			robot.moveFoward(cords[0]);
+			
+			
+			//Robot robot = new Robot();
+			//robot.moveFoward(cords[0]);
 		}
 		
 		return false;
@@ -211,6 +253,14 @@ public class MainActivity extends IOIOActivity implements OnTouchListener, CvCam
 	@Override
 	protected IOIOLooper createIOIOLooper()	{
 		return new Looper();
+	}
+
+	@Override
+	/**
+	 * returns real world cords of center point of located object
+	 */
+	public Point getCenterPoint() {
+		return locator.img2World(curCenterPoint);
 	}
  
 

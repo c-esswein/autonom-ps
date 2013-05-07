@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">PS 2DSelfLocalisation</string>
+    <string name="catch_ball">Catch Ball</string>
     <string name="Calibrate">Calibrate</string>
     <string name="Settings">Settings</string>
     <string name="view_mode">Toggle View Mode</string>

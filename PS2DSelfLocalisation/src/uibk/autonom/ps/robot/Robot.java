@@ -1,5 +1,6 @@
 package uibk.autonom.ps.robot;
 
+
 public class Robot {
 	protected RobotConnector robotConnector;
 	
@@ -35,5 +36,54 @@ public class Robot {
 		request[1] = degreeInt.byteValue();
 		
 		robotConnector.writeRead(request, response);
+	}
+	
+	public void letDownCager(){
+		robotConnector.setCager(100);
+	}
+	
+	public void pullUpCager(){
+		robotConnector.setCager(0);
+	}
+	
+	public void waitForFinishedMovement(){
+		short[] curPosition = getPosition();
+		short[] oldPosition = new short[3];
+		
+		do{
+			try {
+				Thread.sleep(200);
+			} catch (InterruptedException e) {}
+			
+			oldPosition = curPosition;
+			curPosition = getPosition();
+		}while(!eqalPositions(curPosition, oldPosition));
+		
+	}
+	
+	private boolean eqalPositions(short[] pos1, short[] pos2){
+		
+		for(int i = 0; i < 3; i++){
+			if(pos1[i] != pos2[i])
+				return false;
+		}
+		
+		return true;
+	}
+	
+	public short[] getPosition(){
+		short[] curPosition = new short[3];
+		byte[] request = new byte[2];
+		byte[] response = new byte[6];
+		
+		request[0] = 0x1B;		//get position
+
+		robotConnector.writeRead(request, response);
+		
+		curPosition[0] = (short) (((response[1] & 0xFF) << 8) | (response[0] & 0xFF));
+		curPosition[1] = (short) (((response[3] & 0xFF) << 8) | (response[2] & 0xFF));
+		curPosition[2] = (short) (((response[5] & 0xFF) << 8) | (response[4] & 0xFF));
+		
+		return curPosition;
 	}
 }
