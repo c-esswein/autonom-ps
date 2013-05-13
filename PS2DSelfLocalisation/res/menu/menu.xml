@@ -2,6 +2,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
     <item android:id="@+id/calibrate" android:title="@string/Calibrate"></item>
     <item android:id="@+id/catch_ball" android:title="@string/catch_ball"></item>
+    <item android:id="@+id/navigation" android:title="@string/navigation"></item>
     <item android:id="@+id/settings" android:title="@string/Settings"></item>
     <item android:id="@+id/view_mode" android:title="@string/view_mode"></item>
 </menu>

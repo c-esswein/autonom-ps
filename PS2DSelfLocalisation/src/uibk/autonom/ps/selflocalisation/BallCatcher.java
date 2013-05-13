@@ -3,12 +3,11 @@ package uibk.autonom.ps.selflocalisation;
 import org.opencv.core.Point;
 
 import uibk.autonom.ps.activity.SubProgramm;
-import uibk.autonom.ps.colordetector.ColorDetector;
 import uibk.autonom.ps.robot.Robot;
 
 public class BallCatcher extends Thread implements SubProgramm {
 
-	private ColorDetector colorDetector;
+	private CenterPointProvider centerPointProvider;
 	private Locator locator;
 	private Robot robot;
 	
@@ -17,8 +16,8 @@ public class BallCatcher extends Thread implements SubProgramm {
 	
 	private final int minDistance = 8;
 	
-	public BallCatcher(Locator locator, ColorDetector colorDetector){
-		this.colorDetector = colorDetector;
+	public BallCatcher(Locator locator, CenterPointProvider centerPointProvider){
+		this.centerPointProvider = centerPointProvider;
 		this.locator = locator;
 		
 		robot = new Robot();	
@@ -35,7 +34,7 @@ public class BallCatcher extends Thread implements SubProgramm {
 	}
 	
 	public void turn2Point(){
-		Point objectPoint = getCurCenterPoint();
+		Point objectPoint = centerPointProvider.getCenterPoint();
 		int degree = locator.getAngle(objectPoint);
 		
 		robot.turn(degree);
@@ -45,7 +44,7 @@ public class BallCatcher extends Thread implements SubProgramm {
 	}
 	
 	public void move2Point(){
-		Point objectPoint = getCurCenterPoint();
+		Point objectPoint = centerPointProvider.getCenterPoint();
 		int distance = locator.getDistance(objectPoint);
 		
 		if(distance < minDistance){ 
@@ -57,12 +56,6 @@ public class BallCatcher extends Thread implements SubProgramm {
 			turn2Point();
 		}	
 		
-	}
-	
-	public Point getCurCenterPoint(){
-		Point curCenterPoint = colorDetector.getCenterPoints(1).get(0);
-		
-		return locator.img2World(curCenterPoint);
 	}
 	
 	public void cageBall(){

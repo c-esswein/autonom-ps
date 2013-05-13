@@ -19,6 +19,7 @@ import ioio.lib.util.android.IOIOActivity;
 
 import uibk.autonom.ps.selflocalisation.BallCatcher;
 import uibk.autonom.ps.selflocalisation.Calibrator;
+import uibk.autonom.ps.selflocalisation.CenterPointProvider;
 import uibk.autonom.ps.selflocalisation.Locator;
 import uibk.autonom.ps.activity.R;
 import uibk.autonom.ps.colordetector.ColorDetector;
@@ -37,13 +38,13 @@ import android.view.View;
 import android.view.View.OnTouchListener;
 import android.widget.Toast;
 
-public class MainActivity extends IOIOActivity implements OnTouchListener, CvCameraViewListener2 {
+public class MainActivity extends IOIOActivity implements OnTouchListener, CvCameraViewListener2, CenterPointProvider {
 	public static final String DEBUG_TAG = "PS CBT:";
 	
 	private static Context context;
 	
 	private Mat currentRgba;
-	private Scalar currentSelectedColor = null;
+	public Scalar currentSelectedColor = null;
 	private CameraBridgeViewBase mOpenCvCameraView;
 	
 	private ColorDetector colorDetector;
@@ -51,6 +52,7 @@ public class MainActivity extends IOIOActivity implements OnTouchListener, CvCam
 	private boolean showFiltered = false;
 	
 	private Locator locator;
+	private Point curCenterPoint;
 	
 	public enum States{START, CALIBRATED, SUB_PROG};
 	public States curState = States.START;
@@ -110,11 +112,19 @@ public class MainActivity extends IOIOActivity implements OnTouchListener, CvCam
 			
 			return true;
 		case R.id.catch_ball:
-			
 			showMessage("Start in 3sec!");
 			
 			curState = States.SUB_PROG;
-			curSubProgramm = new BallCatcher(locator, colorDetector);
+			curSubProgramm = new BallCatcher(locator, this);
+			curSubProgramm.start();
+			
+			return true;
+			
+		case R.id.navigation:
+			showMessage("Nav Prog starts in 3sec!");
+			
+			curState = States.SUB_PROG;
+			curSubProgramm = new uibk.autonom.ps.navigation.Navigator(this);
 			curSubProgramm.start();
 			
 			return true;
@@ -190,6 +200,7 @@ public class MainActivity extends IOIOActivity implements OnTouchListener, CvCam
 							new Point(p.x - 10, p.y - 10),
 							new Point(p.x + 10, p.y + 10), 
 							new Scalar(255, 0, 255, 0));
+					curCenterPoint = p;
 				}
 				
 			} catch (Exception ex) {
@@ -221,6 +232,11 @@ public class MainActivity extends IOIOActivity implements OnTouchListener, CvCam
 	@Override
 	protected IOIOLooper createIOIOLooper()	{
 		return new Looper();
+	}
+
+	@Override
+	public Point getCenterPoint() {
+		return locator.img2World(curCenterPoint);
 	}
 
 }
