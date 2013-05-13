@@ -2,11 +2,13 @@ package uibk.autonom.ps.selflocalisation;
 
 import org.opencv.core.Point;
 
+import uibk.autonom.ps.activity.SubProgramm;
+import uibk.autonom.ps.colordetector.ColorDetector;
 import uibk.autonom.ps.robot.Robot;
 
-public class BallCatcher implements SubProgramm {
+public class BallCatcher extends Thread implements SubProgramm {
 
-	private CenterPointProvider centerPointProvider;
+	private ColorDetector colorDetector;
 	private Locator locator;
 	private Robot robot;
 	
@@ -15,17 +17,25 @@ public class BallCatcher implements SubProgramm {
 	
 	private final int minDistance = 8;
 	
-	public BallCatcher(Locator locator, CenterPointProvider centerPointProvider){
-		this.centerPointProvider = centerPointProvider;
+	public BallCatcher(Locator locator, ColorDetector colorDetector){
+		this.colorDetector = colorDetector;
 		this.locator = locator;
 		
-		robot = new Robot();
-		
+		robot = new Robot();	
+	}
+
+
+	@Override
+	public void run() {
+		try {
+			Thread.sleep(3000L);
+		} catch (InterruptedException e) {}
+
 		turn2Point();
 	}
 	
 	public void turn2Point(){
-		Point objectPoint = centerPointProvider.getCenterPoint();
+		Point objectPoint = getCurCenterPoint();
 		int degree = locator.getAngle(objectPoint);
 		
 		robot.turn(degree);
@@ -35,7 +45,7 @@ public class BallCatcher implements SubProgramm {
 	}
 	
 	public void move2Point(){
-		Point objectPoint = centerPointProvider.getCenterPoint();
+		Point objectPoint = getCurCenterPoint();
 		int distance = locator.getDistance(objectPoint);
 		
 		if(distance < minDistance){ 
@@ -47,6 +57,12 @@ public class BallCatcher implements SubProgramm {
 			turn2Point();
 		}	
 		
+	}
+	
+	public Point getCurCenterPoint(){
+		Point curCenterPoint = colorDetector.getCenterPoints(1).get(0);
+		
+		return locator.img2World(curCenterPoint);
 	}
 	
 	public void cageBall(){

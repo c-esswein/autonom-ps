@@ -10,11 +10,24 @@ import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 
+import uibk.autonom.ps.activity.MainActivity;
 import uibk.autonom.ps.colordetector.ColorDetector;
 import android.util.Log;
 
 public class Calibrator {
 	private Mat H = null;
+
+	// -----3-----
+	// -----------
+	// 2---------4
+	// -----------
+	// -----1-----
+	//
+	//      |	yOffset
+	//
+	//    XXXXX
+	//    XXXXX	 Robot
+	//    XXXXX
 	
 	public Mat calibrate(Mat inputFrame, Scalar color){
 		ColorDetector colorDetector = new ColorDetector();
@@ -73,6 +86,7 @@ public class Calibrator {
 	private MatOfPoint2f getDstPoints(){
 		Point[] points = new Point[4];
 		
+		// distance from robot to paper
 		float yOffset = 9;
 		
 		points[0] = new Point(0., 0. + yOffset);

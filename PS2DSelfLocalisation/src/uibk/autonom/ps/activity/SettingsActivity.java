@@ -1,5 +1,6 @@
-package uibk.autonom.ps.selflocalisation;
+package uibk.autonom.ps.activity;
 
+import uibk.autonom.ps.activity.R;
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.View;

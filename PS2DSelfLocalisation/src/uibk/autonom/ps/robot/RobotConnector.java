@@ -1,6 +1,6 @@
 package uibk.autonom.ps.robot;
 
-import uibk.autonom.ps.selflocalisation.MainActivity;
+import uibk.autonom.ps.activity.MainActivity;
 import ioio.lib.api.IOIO;
 import ioio.lib.api.PwmOutput;
 import ioio.lib.api.TwiMaster;

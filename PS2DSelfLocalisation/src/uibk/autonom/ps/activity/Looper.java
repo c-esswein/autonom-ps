@@ -1,4 +1,4 @@
-package uibk.autonom.ps.selflocalisation;
+package uibk.autonom.ps.activity;
 
 import uibk.autonom.ps.robot.RobotConnector;
 import ioio.lib.api.exception.ConnectionLostException;

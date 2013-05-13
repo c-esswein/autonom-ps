@@ -64,8 +64,7 @@ public class ColorDetector {
 		List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
 
 		Mat calcFrame = outputFrame.clone();
-		Imgproc.findContours(calcFrame, contours, new Mat(),
-				Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
+		Imgproc.findContours(calcFrame, contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
 		calcFrame.release();
 
 		return contours;

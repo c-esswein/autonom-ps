@@ -39,11 +39,11 @@ public class Robot {
 	}
 	
 	public void letDownCager(){
-		robotConnector.setCager(100);
+		robotConnector.setCager(50);
 	}
 	
 	public void pullUpCager(){
-		robotConnector.setCager(0);
+		robotConnector.setCager(-40);
 	}
 	
 	public void waitForFinishedMovement(){

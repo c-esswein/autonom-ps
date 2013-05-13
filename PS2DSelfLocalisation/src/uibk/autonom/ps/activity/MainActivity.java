@@ -1,4 +1,4 @@
-package uibk.autonom.ps.selflocalisation;
+package uibk.autonom.ps.activity;
 
 import java.util.List;
 
@@ -17,8 +17,10 @@ import org.opencv.core.Scalar;
 import ioio.lib.util.IOIOLooper;
 import ioio.lib.util.android.IOIOActivity;
 
-import uibk.autonom.ps.robot.Robot;
-import uibk.autonom.ps.selflocalisation.R;
+import uibk.autonom.ps.selflocalisation.BallCatcher;
+import uibk.autonom.ps.selflocalisation.Calibrator;
+import uibk.autonom.ps.selflocalisation.Locator;
+import uibk.autonom.ps.activity.R;
 import uibk.autonom.ps.colordetector.ColorDetector;
 import uibk.autonom.ps.colordetector.ColorSelector;
 
@@ -35,14 +37,13 @@ import android.view.View;
 import android.view.View.OnTouchListener;
 import android.widget.Toast;
 
-public class MainActivity extends IOIOActivity implements OnTouchListener, CvCameraViewListener2, CenterPointProvider {
+public class MainActivity extends IOIOActivity implements OnTouchListener, CvCameraViewListener2 {
 	public static final String DEBUG_TAG = "PS CBT:";
 	
 	private static Context context;
 	
 	private Mat currentRgba;
 	private Scalar currentSelectedColor = null;
-	private Point curCenterPoint = null;
 	private CameraBridgeViewBase mOpenCvCameraView;
 	
 	private ColorDetector colorDetector;
@@ -50,8 +51,6 @@ public class MainActivity extends IOIOActivity implements OnTouchListener, CvCam
 	private boolean showFiltered = false;
 	
 	private Locator locator;
-	
-	private boolean debugFlag = false;
 	
 	public enum States{START, CALIBRATED, SUB_PROG};
 	public States curState = States.START;
@@ -113,28 +112,15 @@ public class MainActivity extends IOIOActivity implements OnTouchListener, CvCam
 		case R.id.catch_ball:
 			
 			showMessage("Start in 3sec!");
-			/*try {
-				Thread.sleep(3000L);
-			} catch (InterruptedException e) {}*/
-			//showMessage("Started!");
 			
 			curState = States.SUB_PROG;
-			curSubProgramm = new BallCatcher(locator, this); 
+			curSubProgramm = new BallCatcher(locator, colorDetector);
+			curSubProgramm.start();
 			
 			return true;
 		case R.id.settings:
-			//Intent myIntent = new Intent(this.getApplicationContext(), SettingsActivity.class);
-	        //startActivityForResult(myIntent, 0);
-			debugFlag = !debugFlag;
-			
-			Robot robot = new Robot();
-			
-			 if(debugFlag){
-				 robot.pullUpCager();
-				 showMessage("pullUp");
-			 }else{
-				 robot.letDownCager();
-			 }
+			Intent myIntent = new Intent(this.getApplicationContext(), SettingsActivity.class);
+	        startActivityForResult(myIntent, 0);
 			
 			return true;
 		case R.id.view_mode:
@@ -178,10 +164,7 @@ public class MainActivity extends IOIOActivity implements OnTouchListener, CvCam
 	}
 
 	@Override
-	public void onCameraViewStopped() {
-		// TODO Auto-generated method stub
-		
-	}
+	public void onCameraViewStopped() {}
 
 	@Override	
 	public Mat onCameraFrame(CvCameraViewFrame inputFrame) {
@@ -203,11 +186,10 @@ public class MainActivity extends IOIOActivity implements OnTouchListener, CvCam
 				}
 	
 				for (Point p : centers) {
-					Core.rectangle(currentRgba, new Point(p.x - 10, p.y - 10),
-							new Point(p.x + 10, p.y + 10), new Scalar(255, 0,
-									255, 0));
-					
-					curCenterPoint = p;
+					Core.rectangle(currentRgba, 
+							new Point(p.x - 10, p.y - 10),
+							new Point(p.x + 10, p.y + 10), 
+							new Scalar(255, 0, 255, 0));
 				}
 				
 			} catch (Exception ex) {
@@ -219,23 +201,9 @@ public class MainActivity extends IOIOActivity implements OnTouchListener, CvCam
 	}
 	
 	public boolean onTouch(View v, MotionEvent event) {
-		
 		currentSelectedColor = colorSelector.Select(currentRgba, (int)event.getX(), (int)event.getY());
 		if(currentSelectedColor != null){
 			colorDetector.setHsvColor(currentSelectedColor);	
-		}
-				
-		if(debugFlag){
-			debugFlag = false;
-			int[] cords = colorSelector.removeOffset((int)event.getX(), (int)event.getY());
-			Point realWorld = locator.img2World(new Point(cords[0], cords[1]));
-			Log.i(DEBUG_TAG, "center point image coords:" + cords[0] + " - " + cords[1]);
-			Log.i(DEBUG_TAG, "center point world coords:" + realWorld);
-			
-			
-			
-			//Robot robot = new Robot();
-			//robot.moveFoward(cords[0]);
 		}
 		
 		return false;
@@ -254,14 +222,5 @@ public class MainActivity extends IOIOActivity implements OnTouchListener, CvCam
 	protected IOIOLooper createIOIOLooper()	{
 		return new Looper();
 	}
-
-	@Override
-	/**
-	 * returns real world cords of center point of located object
-	 */
-	public Point getCenterPoint() {
-		return locator.img2World(curCenterPoint);
-	}
- 
 
 }
