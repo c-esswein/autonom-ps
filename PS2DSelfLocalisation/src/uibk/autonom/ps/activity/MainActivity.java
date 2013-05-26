@@ -27,6 +27,7 @@ import uibk.autonom.ps.colordetector.ColorSelector;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -38,7 +39,7 @@ import android.view.View;
 import android.view.View.OnTouchListener;
 import android.widget.Toast;
 
-public class MainActivity extends IOIOActivity implements OnTouchListener, CvCameraViewListener2, CenterPointProvider {
+public class MainActivity extends IOIOActivity implements OnTouchListener, CvCameraViewListener2, CenterPointProvider{
 	public static final String DEBUG_TAG = "PS CBT:";
 	
 	private static Context context;
@@ -49,7 +50,7 @@ public class MainActivity extends IOIOActivity implements OnTouchListener, CvCam
 	
 	private ColorDetector colorDetector;
 	private ColorSelector colorSelector;
-	private boolean showFiltered = false;
+	public boolean showFiltered = false;
 	
 	private Locator locator;
 	private Point curCenterPoint;
@@ -180,7 +181,6 @@ public class MainActivity extends IOIOActivity implements OnTouchListener, CvCam
 	public Mat onCameraFrame(CvCameraViewFrame inputFrame) {
 		currentRgba = inputFrame.rgba();
 		List<Point> centers;
-		
 		if (currentSelectedColor != null) {
 			try {
 				if(showFiltered){
