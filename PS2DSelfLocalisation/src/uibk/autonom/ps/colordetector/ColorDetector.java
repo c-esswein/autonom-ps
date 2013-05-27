@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.NavigableMap;
 import java.util.TreeMap;
 import java.util.Vector;
 
@@ -17,6 +18,8 @@ import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
+
+import uibk.autonom.ps.navigation.Navigator;
 
 public class ColorDetector {
 
@@ -39,14 +42,13 @@ public class ColorDetector {
 	}
 
 	public List<MatOfPoint> getMaxContours(int count) {
-		TreeMap<Double, MatOfPoint> map = getMaxContourSizes(count);
-		return new ArrayList<MatOfPoint>(Arrays.asList(map.values().toArray(new MatOfPoint[count])));
-
+		Map<Double, MatOfPoint> map = getMaxContourSizes(count);
 		
+		return new ArrayList<MatOfPoint>(Arrays.asList(map.values().toArray(new MatOfPoint[0])));
 	}
 	
 	@TargetApi(Build.VERSION_CODES.GINGERBREAD)
-	public TreeMap<Double, MatOfPoint> getMaxContourSizes(int count) {
+	public NavigableMap<Double, MatOfPoint> getMaxContourSizes(int count) {
 		List<MatOfPoint> contours = getContours();
 		TreeMap<Double, MatOfPoint> maxAreaPoints = new TreeMap<Double, MatOfPoint>();
 
@@ -55,12 +57,13 @@ public class ColorDetector {
 
 			maxAreaPoints.put(area, contour);
 		}
-		//remove values until map has size count
-		while(maxAreaPoints.size()>count){
-			maxAreaPoints.pollLastEntry();
-		}
-		return maxAreaPoints;
 		
+		//remove values until map has size count
+		while(maxAreaPoints.size() > count){
+			maxAreaPoints.pollFirstEntry();
+		}
+		
+		return maxAreaPoints.descendingMap();
 	}
 
 	public List<MatOfPoint> getContours() {

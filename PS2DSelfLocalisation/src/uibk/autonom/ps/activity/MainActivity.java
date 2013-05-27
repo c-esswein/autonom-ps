@@ -17,7 +17,6 @@ import org.opencv.core.Scalar;
 import ioio.lib.util.IOIOLooper;
 import ioio.lib.util.android.IOIOActivity;
 
-import uibk.autonom.ps.navigation.Navigator;
 import uibk.autonom.ps.selflocalisation.BallCatcher;
 import uibk.autonom.ps.selflocalisation.Calibrator;
 import uibk.autonom.ps.selflocalisation.CenterPointProvider;
@@ -28,8 +27,6 @@ import uibk.autonom.ps.colordetector.ColorSelector;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.opengl.Visibility;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -38,7 +35,6 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.SurfaceView;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import android.widget.Button;
 import android.widget.Toast;
@@ -99,15 +95,6 @@ public class MainActivity extends IOIOActivity implements OnTouchListener,
 
 		colorDetector = new ColorDetector();
 		locator = new Locator();
-
-		Button next = (Button) findViewById(R.id.buttonNext);
-		next.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				buttonNext_click();
-			}
-		});
-
 	}
 
 	@Override
@@ -122,8 +109,7 @@ public class MainActivity extends IOIOActivity implements OnTouchListener,
 		switch (item.getItemId()) {
 		case R.id.calibrate:
 			Calibrator calibrator = new Calibrator();
-			locator.calibrate(calibrator.calibrate(currentRgba,
-					currentSelectedColor));
+			locator.calibrate(calibrator.calibrate(currentRgba, currentSelectedColor));
 			showMessage("Kamera wurde kalibriert!");
 
 			curState = States.CALIBRATED;
@@ -142,10 +128,8 @@ public class MainActivity extends IOIOActivity implements OnTouchListener,
 			showMessage("Nav Prog starts in 3sec!");
 
 			curState = States.SUB_PROG;
-			curSubProgramm = new uibk.autonom.ps.navigation.Navigator(this);
-			curSubProgramm.start();
-			Button next = (Button) findViewById(R.id.buttonNext);
-			next.setVisibility(View.VISIBLE);
+			curSubProgramm = new uibk.autonom.ps.navigation.Navigator(this, locator);
+			//curSubProgramm.start();
 
 			return true;
 		case R.id.settings:
@@ -233,8 +217,7 @@ public class MainActivity extends IOIOActivity implements OnTouchListener,
 	}
 
 	public boolean onTouch(View v, MotionEvent event) {
-		currentSelectedColor = colorSelector.Select(currentRgba,
-				(int) event.getX(), (int) event.getY());
+		currentSelectedColor = colorSelector.Select(currentRgba, (int) event.getX(), (int) event.getY());
 		if (currentSelectedColor != null) {
 			colorDetector.setHsvColor(currentSelectedColor);
 		}
@@ -260,23 +243,9 @@ public class MainActivity extends IOIOActivity implements OnTouchListener,
 	public Point getCenterPoint() {
 		return locator.img2World(curCenterPoint);
 	}
-
-	private void buttonNext_click() {
-		if (uibk.autonom.ps.navigation.Navigator.class
-				.isInstance(curSubProgramm)) {
-			Navigator nav = (Navigator)curSubProgramm;
-			nav.selectColors(currentSelectedColor);
-		}
-	}
-
-	public void setNextButtonState(int i) {
-		Button next = (Button) findViewById(R.id.buttonNext);
-
-		if (i == 0)
-			next.setVisibility(View.GONE);
-		else
-			next.setText("Next Beacon: " + i);
-
+	
+	public Mat getCurrentImgFrame(){
+		return currentRgba;
 	}
 
 }

@@ -34,7 +34,7 @@ public class Locator {
 		return new Point(destMat.get(0, 0));
 	}
 	
-	public int getDistance(Point p){
+	public static int getDistance(Point p){
 		return (int) Math.sqrt(p.x * p.x + p.y * p.y);
 	}
 	
