@@ -62,13 +62,10 @@ public class SettingsActivity extends Activity {
 		edit = (EditText) findViewById(R.id.editColorVector4);
 		edit.setText(""+val4);
 		
-		CheckBox checkbox = (CheckBox) findViewById(R.id.checkBoxUseMonochrome);
-		checkbox.setChecked(useMonochrome);
 	}
 
 	private void buttonSave_click() {
 		int val1, val2, val3, val4;
-		Boolean useMonochrome;
 
 		EditText edit = (EditText) findViewById(R.id.editColorVector1);
 		val1 = Integer.valueOf(edit.getText().toString());
@@ -78,9 +75,6 @@ public class SettingsActivity extends Activity {
 		val3 = Integer.valueOf(edit.getText().toString());
 		edit = (EditText) findViewById(R.id.editColorVector4);
 		val4 = Integer.valueOf(edit.getText().toString());
-		
-		CheckBox checkbox = (CheckBox) findViewById(R.id.checkBoxUseMonochrome);
-		useMonochrome = checkbox.isChecked();
 
 		// Store settings
 		SharedPreferences settings = getSharedPreferences("settings", 0);
@@ -89,7 +83,6 @@ public class SettingsActivity extends Activity {
 		editor.putInt("val2", val2);
 		editor.putInt("val3", val3);
 		editor.putInt("val4", val4);
-		editor.putBoolean("useMonochrome", useMonochrome);
 		editor.commit();
 
 		ColorConverter.mColorRadius = new Scalar(val1, val2, val3, val4);
