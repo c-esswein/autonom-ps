@@ -1,10 +1,14 @@
 package uibk.autonom.ps.colordetector;
 
+import android.annotation.TargetApi;
+import android.os.Build;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.Vector;
 
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
@@ -35,29 +39,28 @@ public class ColorDetector {
 	}
 
 	public List<MatOfPoint> getMaxContours(int count) {
+		TreeMap<Double, MatOfPoint> map = getMaxContourSizes(count);
+		return new ArrayList<MatOfPoint>(Arrays.asList(map.values().toArray(new MatOfPoint[count])));
+
+		
+	}
+	
+	@TargetApi(Build.VERSION_CODES.GINGERBREAD)
+	public TreeMap<Double, MatOfPoint> getMaxContourSizes(int count) {
 		List<MatOfPoint> contours = getContours();
-		Map<Double, MatOfPoint> maxAreaPoints = new TreeMap<Double, MatOfPoint>();
+		TreeMap<Double, MatOfPoint> maxAreaPoints = new TreeMap<Double, MatOfPoint>();
 
 		for (MatOfPoint contour : contours) {
 			double area = Imgproc.contourArea(contour);
 
 			maxAreaPoints.put(area, contour);
 		}
-
-		List<MatOfPoint> tmp_list = new ArrayList<MatOfPoint>();
-		List<Double> keys = new ArrayList<Double>();
-
-		// Add to temporary key list.
-		for (Double d : maxAreaPoints.keySet())
-			keys.add(d);
-
-		// sort the keys
-		Collections.sort(keys);
-
-		for(int i=keys.size()-1; i > keys.size()-(count+1); i--)
-			tmp_list.add(maxAreaPoints.get(keys.get(i)));
-
-		return tmp_list;
+		//remove values until map has size count
+		while(maxAreaPoints.size()>count){
+			maxAreaPoints.pollLastEntry();
+		}
+		return maxAreaPoints;
+		
 	}
 
 	public List<MatOfPoint> getContours() {
