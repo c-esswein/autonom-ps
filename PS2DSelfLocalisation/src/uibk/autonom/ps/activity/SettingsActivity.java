@@ -32,7 +32,7 @@ public class SettingsActivity extends Activity {
 			}
 		});
 
-		Button save = (Button) findViewById(R.id.ButtonSave);
+		Button save = (Button) findViewById(R.id.buttonSave);
 		save.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {

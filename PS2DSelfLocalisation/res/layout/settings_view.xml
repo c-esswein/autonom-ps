@@ -16,6 +16,39 @@
         android:layout_width="250px"
             android:textSize="18px"
         android:layout_height="55px">
-    </Button>    
+    </Button>
+
+       <EditText
+           android:id="@+id/editColorVector1"
+           android:layout_width="match_parent"
+           android:layout_height="wrap_content"
+           android:ems="10" >
+
+           <requestFocus />
+       </EditText>
+
+       <EditText
+           android:id="@+id/editColorVector2"
+           android:layout_width="match_parent"
+           android:layout_height="wrap_content"
+           android:ems="10" />
+
+       <EditText
+           android:id="@+id/editColorVector3"
+           android:layout_width="match_parent"
+           android:layout_height="wrap_content"
+           android:ems="10" />
+
+       <EditText
+           android:id="@+id/editColorVector4"
+           android:layout_width="match_parent"
+           android:layout_height="wrap_content"
+           android:ems="10" />
+
+       <Button
+           android:id="@+id/buttonSave"
+           android:layout_width="194dp"
+           android:layout_height="wrap_content"
+           android:text="Save" />
 
 </LinearLayout>
