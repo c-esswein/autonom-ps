@@ -141,6 +141,10 @@ public class Navigator extends Thread implements SubProgramm {
 				m2 = m; 
 			}
 		}
+		
+		if(m1 != null && m2 == null){	// fixing sorting error if markers listt is sorted upside down
+			m2 = markers[markers.length - 1];
+		}
 
 		if(m1 == null || m2 == null || m1 == m2){
 			// TODO turn and try again
