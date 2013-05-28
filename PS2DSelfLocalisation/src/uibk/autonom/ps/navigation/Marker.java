@@ -52,7 +52,7 @@ public class Marker {
 		
 		NavigableMap<Double, MatOfPoint> result = colorDetector.getMaxContourSizes(1);
 
-		if(result.size() > 1){
+		if(result.size() > 0){
 			java.util.Map.Entry<Double, MatOfPoint> entry = result.pollFirstEntry();
 			curImgSize = entry.getKey();
 			curImgPosition = colorDetector.getCenterPoint(entry.getValue());
