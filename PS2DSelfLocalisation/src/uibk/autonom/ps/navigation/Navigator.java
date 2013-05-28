@@ -23,11 +23,11 @@ public class Navigator extends Thread implements SubProgramm {
 
 	private float factorX = 300 / MAX_X;
 	private float factorY = 150 / MAX_Y;
-	
 	private static final int MAX_X = 100;
 	private static final int MAX_Y = 100;
 
-	private Point curPosition;
+	private Point curPosition = new Point(0, 0);
+	private double curDirection = 0;
 	private int setBeacons = 1;
 	
 	private Button next;
@@ -63,6 +63,7 @@ public class Navigator extends Thread implements SubProgramm {
 		Point marker1Pos = locator.img2World(markers[0].curImgPosition);
 		Point marker2Pos = locator.img2World(markers[1].curImgPosition);
 		curPosition = findRobotPosition(markers[0], markers[1], Locator.getDistance(marker1Pos), Locator.getDistance(marker2Pos));
+		curDirection = findRobotDirection(markers[0], marker1Pos);
 		
 		Log.i(MainActivity.DEBUG_TAG, "curPosition: " + curPosition);
 		// curPos is set
@@ -146,7 +147,7 @@ public class Navigator extends Thread implements SubProgramm {
 			m2 = markers[markers.length - 1];
 		}
 
-		if(m1 == null || m2 == null || m1 == m2){
+		if(m1 == null || m2 == null || m1 == m2 || !m1.isInImg() || !m1.isInImg()){
 			// TODO turn and try again
 			Log.i(MainActivity.DEBUG_TAG, "keine zwei punkte in view");
 			// robot.turn(10);
@@ -154,7 +155,9 @@ public class Navigator extends Thread implements SubProgramm {
 			throw new Error("not implemented");
 		}
 		
-		Marker[] returnMarkers = {m1, m2};
+		Marker[] returnMarkers = new Marker[2];
+		returnMarkers[0] = m1;
+		returnMarkers[1] = m2;
 		return returnMarkers;
 	}
 
@@ -196,6 +199,17 @@ public class Navigator extends Thread implements SubProgramm {
         return null;
     }
 	
+	/**
+	 * 
+	 * @param m
+	 * @param p
+	 * @return
+	 */
+	public static double findRobotDirection(Marker m, Point p){
+		
+		return 0;
+	}
+	
 	private static boolean between(double val, double d1, double d2) {
         return (val >= d1 && val <= d2);        
     }
@@ -206,7 +220,7 @@ public class Navigator extends Thread implements SubProgramm {
 	 * @param p Point p with cords corresponding to virtual net
 	 */
 	public void moveToPoint(Point p) {
-
+		
 	}
 
 	public Point getRealCords(Point p) {

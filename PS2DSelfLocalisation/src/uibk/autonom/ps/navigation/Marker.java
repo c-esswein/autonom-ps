@@ -30,6 +30,8 @@ public class Marker {
 	public Point curImgPosition;
 	public double curImgSize = 0;
 	
+	public static double MIN_SIZE = 0.;
+	
 	public Marker(Scalar color, Point position){
 		this.color = color;
 		this.position = position;
@@ -55,6 +57,10 @@ public class Marker {
 			curImgSize = entry.getKey();
 			curImgPosition = colorDetector.getCenterPoint(entry.getValue());
 		}
+	}
+	
+	public boolean isInImg(){
+		return curImgPosition != null && curImgSize > MIN_SIZE;
 	}
 	
 }
