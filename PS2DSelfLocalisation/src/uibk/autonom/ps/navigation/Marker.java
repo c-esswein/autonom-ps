@@ -28,7 +28,7 @@ public class Marker {
 	private Point position;
 	
 	public Point curImgPosition;
-	public double curImgSize;
+	public double curImgSize = 0;
 	
 	public Marker(Scalar color, Point position){
 		this.color = color;
