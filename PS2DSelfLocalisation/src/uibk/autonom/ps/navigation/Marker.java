@@ -26,13 +26,14 @@ public class Marker {
 	 * -------------------------------------
 	 */
 	private Point position;
+	private int index;
 	
 	public Point curImgPosition;
 	public double curImgSize = 0;
 	
 	public static double MIN_SIZE = 0.;
 	
-	public Marker(Scalar color, Point position){
+	public Marker(int index, Scalar color, Point position){
 		this.color = color;
 		this.position = position;
 	}
@@ -61,6 +62,32 @@ public class Marker {
 	
 	public boolean isInImg(){
 		return curImgPosition != null && curImgSize > MIN_SIZE;
+	}
+	
+	/**
+	 * TODO unused
+	 * @param p current virtual cords of robot
+	 * @return angle to x axe
+	 */
+	public double getAngle(Point p){
+		double angle = 0.;
+		
+		switch(index){
+		case 0:
+			return angle + 180.;
+		case 1:
+			return angle + 180.;
+		case 2:
+			return angle + 180.;
+		case 3:
+			return angle + 180.;
+		case 4:
+			return angle + 180.;
+		case 5:
+			return angle + 180.;
+		default:
+			return angle;
+		}
 	}
 	
 }

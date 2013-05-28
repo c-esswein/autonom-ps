@@ -21,7 +21,7 @@ public class Navigator extends Thread implements SubProgramm {
 	private MainActivity activity;
 	private Locator locator;
 
-	private float factorX = 300 / MAX_X;
+	private float factorX = 150 / MAX_X;
 	private float factorY = 150 / MAX_Y;
 	private static final int MAX_X = 100;
 	private static final int MAX_Y = 100;
@@ -62,7 +62,7 @@ public class Navigator extends Thread implements SubProgramm {
 		
 		Point marker1Pos = locator.img2World(markers[0].curImgPosition);
 		Point marker2Pos = locator.img2World(markers[1].curImgPosition);
-		curPosition = findRobotPosition(markers[0], markers[1], Locator.getDistance(marker1Pos), Locator.getDistance(marker2Pos));
+		curPosition = findRobotPosition(markers[0], markers[1], Locator.getDistance(marker1Pos)/factorX, Locator.getDistance(marker2Pos)/factorX);
 		curDirection = findRobotDirection(markers[0], marker1Pos);
 		
 		Log.i(MainActivity.DEBUG_TAG, "curPosition: " + curPosition);
@@ -112,7 +112,7 @@ public class Navigator extends Thread implements SubProgramm {
 			break;
 		}
 		
-		markers[setBeacons - 1] = new Marker(color, new Point(x, y));
+		markers[setBeacons - 1] = new Marker(setBeacons - 1, color, new Point(x, y));
 		
 		setBeacons++;
 		if(setBeacons>6){
@@ -143,7 +143,7 @@ public class Navigator extends Thread implements SubProgramm {
 			}
 		}
 		
-		if(m1 != null && m2 == null){	// fixing sorting error if markers listt is sorted upside down
+		if(m1 != null && m2 == null){	// fixing sorting error if markers list is sorted
 			m2 = markers[markers.length - 1];
 		}
 
@@ -206,6 +206,8 @@ public class Navigator extends Thread implements SubProgramm {
 	 * @return
 	 */
 	public static double findRobotDirection(Marker m, Point p){
+		
+		//TODO unused
 		
 		return 0;
 	}
