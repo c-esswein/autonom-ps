@@ -112,7 +112,7 @@ public class Navigator extends Thread implements SubProgramm {
 			break;
 		}
 		
-		markers[setBeacons - 1] = new Marker(setBeacons - 1, color, new Point(x, y));
+		//markers[setBeacons - 1] = new Marker(setBeacons - 1, color, new Point(x, y));
 		
 		setBeacons++;
 		if(setBeacons>6){
