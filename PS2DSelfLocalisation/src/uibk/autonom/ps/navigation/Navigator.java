@@ -31,6 +31,7 @@ public class Navigator extends Thread implements SubProgramm {
 	private int setBeacons = 1;
 	
 	private Button next;
+	private Scalar savedColor = null;
 
 	// public enum States{START, SELECT_COLORS, CALIBRATE, };
 	// public States curState = States.START;
@@ -71,7 +72,14 @@ public class Navigator extends Thread implements SubProgramm {
 	}
 
 	private void buttonNext_click() {
-		selectColors(activity.currentSelectedColor);
+		Scalar curColor = activity.currentSelectedColor;
+		
+		if(savedColor == null){
+			savedColor = curColor;
+		}else{
+			selectColors(curColor, savedColor);	
+			savedColor = null;
+		}
 	}
 
 	public void setNextButtonState(int i) {
@@ -81,7 +89,7 @@ public class Navigator extends Thread implements SubProgramm {
 			next.setText("Next Beacon: " + i);
 	}
 
-	public void selectColors(Scalar color) {
+	public void selectColors(Scalar color1, Scalar color2) {
 		double x, y;
 		x = y = 0;
 
@@ -112,7 +120,7 @@ public class Navigator extends Thread implements SubProgramm {
 			break;
 		}
 		
-		//markers[setBeacons - 1] = new Marker(setBeacons - 1, color, new Point(x, y));
+		markers[setBeacons - 1] = new Marker(setBeacons - 1, color1, color2, new Point(x, y));
 		
 		setBeacons++;
 		if(setBeacons>6){
