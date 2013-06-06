@@ -31,6 +31,7 @@ public class Navigator extends Thread implements SubProgramm {
 	private int setBeacons = 1;
 	
 	private Button next;
+	private Scalar savedColor = null;
 
 	// public enum States{START, SELECT_COLORS, CALIBRATE, };
 	// public States curState = States.START;
@@ -62,7 +63,7 @@ public class Navigator extends Thread implements SubProgramm {
 		
 		Point marker1Pos = locator.img2World(markers[0].curImgPosition);
 		Point marker2Pos = locator.img2World(markers[1].curImgPosition);
-		curPosition = findRobotPosition(markers[0], markers[1], Locator.getDistance(marker1Pos), Locator.getDistance(marker2Pos));
+		curPosition = findRobotPosition(markers[0], markers[1], Locator.getDistance(marker1Pos)/factorX, Locator.getDistance(marker2Pos)/factorX);
 		curDirection = findRobotDirection(markers[0], marker1Pos);
 		
 		Log.i(MainActivity.DEBUG_TAG, "curPosition: " + curPosition);
@@ -71,7 +72,14 @@ public class Navigator extends Thread implements SubProgramm {
 	}
 
 	private void buttonNext_click() {
-		selectColors(activity.currentSelectedColor);
+		Scalar curColor = activity.currentSelectedColor;
+		
+		if(savedColor == null){
+			savedColor = curColor;
+		}else{
+			selectColors(curColor, savedColor);	
+			savedColor = null;
+		}
 	}
 
 	public void setNextButtonState(int i) {
@@ -81,7 +89,7 @@ public class Navigator extends Thread implements SubProgramm {
 			next.setText("Next Beacon: " + i);
 	}
 
-	public void selectColors(Scalar color) {
+	public void selectColors(Scalar color1, Scalar color2) {
 		double x, y;
 		x = y = 0;
 
@@ -112,7 +120,7 @@ public class Navigator extends Thread implements SubProgramm {
 			break;
 		}
 		
-		markers[setBeacons - 1] = new Marker(color, new Point(x, y));
+		markers[setBeacons - 1] = new Marker(setBeacons - 1, color1, color2, new Point(x, y));
 		
 		setBeacons++;
 		if(setBeacons>6){
@@ -143,7 +151,7 @@ public class Navigator extends Thread implements SubProgramm {
 			}
 		}
 		
-		if(m1 != null && m2 == null){	// fixing sorting error if markers listt is sorted upside down
+		if(m1 != null && m2 == null){	// fixing sorting error if markers list is sorted
 			m2 = markers[markers.length - 1];
 		}
 
@@ -206,6 +214,8 @@ public class Navigator extends Thread implements SubProgramm {
 	 * @return
 	 */
 	public static double findRobotDirection(Marker m, Point p){
+		
+		//TODO unused
 		
 		return 0;
 	}
