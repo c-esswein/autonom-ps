@@ -21,7 +21,7 @@ public class Navigator extends Thread implements SubProgramm {
 	private MainActivity activity;
 	private Locator locator;
 
-	private float factorX = 300 / MAX_X;
+	private float factorX = 150 / MAX_X;
 	private float factorY = 150 / MAX_Y;
 	private static final int MAX_X = 100;
 	private static final int MAX_Y = 100;
@@ -135,7 +135,7 @@ public class Navigator extends Thread implements SubProgramm {
 		
 		for(Marker m : markers){
 			m.calculateImgPosition(activity.getCurrentImgFrame());
-			
+			Log.i("MARK", "Marker: " +m.curImgSize);
 			if(m1 == null || m.curImgSize > m1.curImgSize){
 				m1 = m;
 			}else if(m2 == null || m.curImgSize > m2.curImgSize){
