@@ -22,14 +22,15 @@ import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
 import uibk.autonom.ps.activity.MainActivity;
+import uibk.autonom.ps.colordetector.detectors.ColorThresholdDetector;
 import uibk.autonom.ps.navigation.Navigator;
 
 public class ColorCodeDetector {
 
 	private int horVariance = 50;
 
-	private ColorDetector detector1 = new ColorDetector();
-	private ColorDetector detector2 = new ColorDetector();
+	private ColorDetector detector1 = new ColorThresholdDetector();
+	private ColorDetector detector2 = new ColorThresholdDetector();
 
 	public ColorCodeDetector(Scalar color1, Scalar color2) {
 		detector1.setHsvColor(color1);

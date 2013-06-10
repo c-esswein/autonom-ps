@@ -12,6 +12,7 @@ import org.opencv.core.Scalar;
 
 import uibk.autonom.ps.activity.MainActivity;
 import uibk.autonom.ps.colordetector.ColorDetector;
+import uibk.autonom.ps.colordetector.detectors.ColorThresholdDetector;
 import android.util.Log;
 
 public class Calibrator {
@@ -30,7 +31,7 @@ public class Calibrator {
 	//    XXXXX
 	
 	public Mat calibrate(Mat inputFrame, Scalar color){
-		ColorDetector colorDetector = new ColorDetector();
+		ColorDetector colorDetector = new ColorThresholdDetector();
 		MatOfPoint2f srcPoints;
 		MatOfPoint2f dstPoints;
 		

@@ -24,7 +24,7 @@ import uibk.autonom.ps.selflocalisation.Locator;
 import uibk.autonom.ps.activity.R;
 import uibk.autonom.ps.colordetector.ColorDetector;
 import uibk.autonom.ps.colordetector.ColorSelector;
-
+import uibk.autonom.ps.colordetector.detectors.ColorThresholdDetector;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -93,7 +93,7 @@ public class MainActivity extends IOIOActivity implements OnTouchListener,
 		mOpenCvCameraView.setVisibility(SurfaceView.VISIBLE);
 		mOpenCvCameraView.setCvCameraViewListener(this);
 
-		colorDetector = new ColorDetector();
+		colorDetector = new ColorThresholdDetector();
 		locator = new Locator();
 	}
 
