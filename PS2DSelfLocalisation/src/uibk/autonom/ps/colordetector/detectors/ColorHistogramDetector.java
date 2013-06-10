@@ -2,17 +2,12 @@ package uibk.autonom.ps.colordetector.detectors;
 
 import java.util.ArrayList;
 
-import org.opencv.core.Core;
-import org.opencv.core.CvType;
-import org.opencv.core.Mat;
-import org.opencv.core.MatOfFloat;
-import org.opencv.core.MatOfInt;
-import org.opencv.core.Point;
-import org.opencv.core.Scalar;
+import org.opencv.core.*;
 import org.opencv.imgproc.Imgproc;
 
 // http://docs.opencv.org/doc/tutorials/imgproc/histograms/back_projection/back_projection.html
 // http://code.opencv.org/projects/opencv/repository/revisions/master/raw/samples/cpp/tutorial_code/Histograms_Matching/calcBackProject_Demo2.cpp
+//http://code.google.com/p/javacv/source/browse/OpenCV2_Cookbook/src/opencv2_cookbook/chapter04/ContentFinder.scala?repo=examples&r=c101e12e53ce911dce11ea70a47189f688d400ba
 
 public class ColorHistogramDetector extends ColorThresholdDetector {
 	
@@ -26,10 +21,12 @@ public class ColorHistogramDetector extends ColorThresholdDetector {
 		// TODO Auto-generated constructor stub
 	}
 
-	public Mat detect(Mat inputFrame) {
+	public synchronized Mat detect(Mat inputFrame) {
 		Mat calcFrame = new Mat();
 
 		Imgproc.cvtColor(inputFrame, calcFrame, Imgproc.COLOR_RGB2HSV);
+		
+		String wtff=calcFrame.dump();
 		
 		//extract hue channel
 		Mat hue = calcFrame;/*new Mat();
@@ -39,12 +36,13 @@ public class ColorHistogramDetector extends ColorThresholdDetector {
 		ArrayList<Mat> dst = new ArrayList<Mat>();
 		dst.add(hue);
 		//Core.mixChannels(src, dst, ch);
+		String wtf3=dst.get(0).dump();
 		
 		Mat fillImg = new Mat(16, 16, CvType.CV_8UC3);
 		fillImg.setTo(hsvColor);
-		
+		String fillDmp=fillImg.dump();
 		MatOfInt histSize=new MatOfInt(hbins,hbins);
-
+		
 		// hue varies from 0 to 179, see cvtColor
 		// saturation varies from 0 (black-gray-white) to
 		// 255 (pure spectrum color)
@@ -58,9 +56,12 @@ public class ColorHistogramDetector extends ColorThresholdDetector {
 		ArrayList<Mat> fillImgs=new ArrayList<Mat>();
 		fillImgs.add(fillImg);
 		Imgproc.calcHist(fillImgs, channels, new Mat(), hist, histSize, ranges);
-
+		String histDmp=hist.dump();
 		outputFrame = new Mat();
+		String wtf1=dst.get(0).dump();
 		Imgproc.calcBackProject(dst, channels, hist, calcFrame, ranges, 1);
+		String wtf2=dst.get(0).dump();
+		String wtf = calcFrame.dump();
 		int w = inputFrame.cols(); int h = inputFrame.rows();
 		int bin_w = (int) Math.round( (double) w / hbins );
 		Mat histImg = new Mat( w, h, CvType.CV_8UC3 );
