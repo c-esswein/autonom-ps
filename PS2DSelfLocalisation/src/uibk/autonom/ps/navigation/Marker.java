@@ -1,18 +1,21 @@
 package uibk.autonom.ps.navigation;
 
+import java.util.Map.Entry;
+import java.util.NavigableMap;
+
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfPoint;
 import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 
 import android.annotation.TargetApi;
 import android.os.Build;
 
-import uibk.autonom.ps.colordetector.ColorCodeDetector;
+import uibk.autonom.ps.colordetector.detectors.ColorThresholdDetector;
 
 @TargetApi(Build.VERSION_CODES.GINGERBREAD)
 public class Marker {
-	private Scalar color1;
-	private Scalar color2;
+	private Scalar color;
 
 	/**
 	 * Point corresponding to virtual system
@@ -29,19 +32,16 @@ public class Marker {
 
 	public Point curImgPosition;
 	public double curImgSize = 0;
+	
+	private double MIN_SIZE = 200.;
 
-	public Marker(int index, Scalar color1, Scalar color2, Point position) {
-		this.color1 = color1;
-		this.color2 = color2;
+	public Marker(int index, Scalar color, Point position) {
+		this.color = color;
 		this.position = position;
 	}
 
-	public Scalar getColor1() {
-		return color1;
-	}
-
-	public Scalar getColor2() {
-		return color2;
+	public Scalar getColor() {
+		return color;
 	}
 
 	public Point getPosition() {
@@ -49,23 +49,24 @@ public class Marker {
 	}
 
 	public void calculateImgPosition(Mat curImgFrame) {
-		ColorCodeDetector detector = new ColorCodeDetector(color1, color2);
-		Point tempPoint = detector.getBottomPoint(curImgFrame);
-		if (tempPoint != null) {
-			curImgSize = 1;
-			curImgPosition=	tempPoint;		
+		ColorThresholdDetector detector = new ColorThresholdDetector();
+		detector.setHsvColor(color);
+		detector.detect(curImgFrame);
+		NavigableMap<Double, MatOfPoint> contours = detector.getMaxContourSizes(1);
+				
+		if (contours.size() == 1) {
+			Entry<Double, MatOfPoint> entry = contours.firstEntry();
+			
+			curImgSize = entry.getKey();
+			curImgPosition=	detector.getBotttomPoint(entry.getValue());			
+		}else{
+			curImgSize = 0;
+			curImgPosition = null;
 		}
-		else
-		{
-			curImgFrame=null;
-			curImgSize=0;
-		
-		}
-
 	}
 
 	public boolean isInImg() {
-		return curImgPosition != null;
+		return curImgPosition != null && curImgSize > MIN_SIZE;
 	}
 
 	/**

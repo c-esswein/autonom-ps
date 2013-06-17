@@ -88,7 +88,7 @@ public class Calibrator {
 		Point[] points = new Point[4];
 		
 		// distance from robot to paper
-		float yOffset = 9;
+		float yOffset = 14;
 		
 		points[0] = new Point(0., 0. + yOffset);
 		points[1] = new Point(-9.2, 13.7 + yOffset);

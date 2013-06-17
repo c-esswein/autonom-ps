@@ -21,17 +21,17 @@ public class Navigator extends Thread implements SubProgramm {
 	private MainActivity activity;
 	private Locator locator;
 
-	private float factorX = 150 / MAX_X;
-	private float factorY = 150 / MAX_Y;
+	private float factorX = 1; //150 / MAX_X;
+	private float factorY = 1; //150 / MAX_Y;
 	private static final int MAX_X = 100;
 	private static final int MAX_Y = 100;
 
 	private Point curPosition = new Point(0, 0);
 	private double curDirection = 0;
 	private int setBeacons = 1;
+	private int beaconsCount = 2;
 	
-	private Button next;
-	private Scalar savedColor = null;
+	private Button nextBtn;
 
 	// public enum States{START, SELECT_COLORS, CALIBRATE, };
 	// public States curState = States.START;
@@ -40,17 +40,17 @@ public class Navigator extends Thread implements SubProgramm {
 		this.activity = activity;
 		this.locator = locator;
 		
-		markers = new Marker[6];
+		markers = new Marker[beaconsCount];
 		robot = new Robot();
 		
-		next = (Button) activity.findViewById(R.id.buttonNext);
-		next.setOnClickListener(new OnClickListener() {
+		nextBtn = (Button) activity.findViewById(R.id.buttonNext);
+		nextBtn.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				buttonNext_click();
 			}
 		});
-		next.setVisibility(View.VISIBLE);
+		nextBtn.setVisibility(View.VISIBLE);
 	}
 
 	@Override
@@ -63,33 +63,30 @@ public class Navigator extends Thread implements SubProgramm {
 		
 		Point marker1Pos = locator.img2World(markers[0].curImgPosition);
 		Point marker2Pos = locator.img2World(markers[1].curImgPosition);
-		curPosition = findRobotPosition(markers[0], markers[1], Locator.getDistance(marker1Pos)/factorX, Locator.getDistance(marker2Pos)/factorX);
+		double dist1 = Locator.getDistance(marker1Pos)/factorX;
+		double dist2 = Locator.getDistance(marker2Pos)/factorX;
+		curPosition = findRobotPosition(markers[0], markers[1], dist1, dist2);
 		curDirection = findRobotDirection(markers[0], marker1Pos);
 		
 		Log.i(MainActivity.DEBUG_TAG, "curPosition: " + curPosition);
-		// curPos is set
 		
+		moveToPoint(new Point(100, 100));		
 	}
 
 	private void buttonNext_click() {
 		Scalar curColor = activity.currentSelectedColor;
 		
-		if(savedColor == null){
-			savedColor = curColor;
-		}else{
-			selectColors(curColor, savedColor);	
-			savedColor = null;
-		}
+		selectColors(curColor);	
 	}
 
 	public void setNextButtonState(int i) {
 		if (i == 0)
-			next.setVisibility(View.GONE);
+			nextBtn.setVisibility(View.GONE);
 		else
-			next.setText("Next Beacon: " + i);
+			nextBtn.setText("Next Beacon: " + i);
 	}
 
-	public void selectColors(Scalar color1, Scalar color2) {
+	public void selectColors(Scalar color){
 		double x, y;
 		x = y = 0;
 
@@ -120,10 +117,10 @@ public class Navigator extends Thread implements SubProgramm {
 			break;
 		}
 		
-		markers[setBeacons - 1] = new Marker(setBeacons - 1, color1, color2, new Point(x, y));
+		markers[setBeacons - 1] = new Marker(setBeacons - 1, color, new Point(x, y));
 		
 		setBeacons++;
-		if(setBeacons>6){
+		if(setBeacons > beaconsCount){
 			setNextButtonState(0);
 			start();	// start thread
 		}
@@ -155,7 +152,7 @@ public class Navigator extends Thread implements SubProgramm {
 			m2 = markers[markers.length - 1];
 		}
 
-		if(m1 == null || m2 == null || m1 == m2 || !m1.isInImg() || !m1.isInImg()){
+		if(m1 == null || m2 == null || m1 == m2 || !m1.isInImg() || !m2.isInImg()){
 			// TODO turn and try again
 			Log.i(MainActivity.DEBUG_TAG, "keine zwei punkte in view");
 			// robot.turn(10);
@@ -207,6 +204,10 @@ public class Navigator extends Thread implements SubProgramm {
         return null;
     }
 	
+	private static boolean between(double val, double d1, double d2) {
+        return (val >= d1 && val <= d2);        
+    }
+	
 	/**
 	 * 
 	 * @param m
@@ -219,10 +220,6 @@ public class Navigator extends Thread implements SubProgramm {
 		
 		return 0;
 	}
-	
-	private static boolean between(double val, double d1, double d2) {
-        return (val >= d1 && val <= d2);        
-    }
 
 	/**
 	 * moves robot to robot p
@@ -230,7 +227,20 @@ public class Navigator extends Thread implements SubProgramm {
 	 * @param p Point p with cords corresponding to virtual net
 	 */
 	public void moveToPoint(Point p) {
+		double xDist = curPosition.x - p.x;
+		double yDist = curPosition.y - p.y;
 		
+		double angle = 90 - Math.tan(yDist / xDist);
+		
+		double distance = Math.sqrt(xDist * xDist + yDist * yDist); 
+		
+		robot.turn((int) angle);
+		robot.waitForFinishedMovement();
+		curDirection = angle;
+		
+		robot.moveFoward((int) distance);
+		robot.waitForFinishedMovement();
+		curPosition = p;
 	}
 
 	public Point getRealCords(Point p) {
