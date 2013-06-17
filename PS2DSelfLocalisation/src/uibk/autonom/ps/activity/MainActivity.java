@@ -36,7 +36,6 @@ import android.view.MotionEvent;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.View.OnTouchListener;
-import android.widget.Button;
 import android.widget.Toast;
 
 public class MainActivity extends IOIOActivity implements OnTouchListener,
@@ -129,7 +128,6 @@ public class MainActivity extends IOIOActivity implements OnTouchListener,
 
 			curState = States.SUB_PROG;
 			curSubProgramm = new uibk.autonom.ps.navigation.Navigator(this, locator);
-			//curSubProgramm.start();
 
 			return true;
 		case R.id.settings:
