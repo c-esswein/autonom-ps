@@ -1,5 +1,6 @@
 package uibk.autonom.ps.navigation;
 
+import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 
@@ -28,17 +29,20 @@ public class Navigator extends Thread implements SubProgramm {
 
 	private Point curPosition = new Point(0, 0);
 	private double curDirection = 0;
-	private int setBeacons = 1;
+	private int setBeacons = 0;
 	private int beaconsCount = 2;
 	
 	private Button nextBtn;
+	
+	private FinishedNavigationAction finishedAction;
 
 	// public enum States{START, SELECT_COLORS, CALIBRATE, };
 	// public States curState = States.START;
 
-	public Navigator(MainActivity activity, Locator locator) {
+	public Navigator(MainActivity activity, Locator locator, FinishedNavigationAction finishedAction) {
 		this.activity = activity;
 		this.locator = locator;
+		this.finishedAction = finishedAction;
 		
 		markers = new Marker[beaconsCount];
 		robot = new Robot();
@@ -56,7 +60,7 @@ public class Navigator extends Thread implements SubProgramm {
 	@Override
 	public void run() {
 		try {
-			Thread.sleep(10000);
+			Thread.sleep(5000);
 		} catch (InterruptedException e) {}
 		
 		Marker[] markers = findMarkers();
@@ -70,13 +74,22 @@ public class Navigator extends Thread implements SubProgramm {
 		
 		Log.i(MainActivity.DEBUG_TAG, "curPosition: " + curPosition);
 		
-		moveToPoint(new Point(100, 100));		
+		if(finishedAction != null){
+			finishedAction.startAction(this);			
+		}else{
+			moveToPoint(new Point(100, 100));
+		}
 	}
 
 	private void buttonNext_click() {
 		Scalar curColor = activity.currentSelectedColor;
 		
-		selectColors(curColor);	
+		if(setBeacons == 0){
+			finishedAction.setTrackColor(curColor);
+			setBeacons = 1;
+		}else{
+			selectColors(curColor);	
+		}
 	}
 
 	public void setNextButtonState(int i) {
@@ -130,16 +143,20 @@ public class Navigator extends Thread implements SubProgramm {
 
 	}
 
+	public Marker[] findMarkers() {
+		return findMarkers(true);
+	}
 
 	/**
 	 * finds two markers in current image and return them
 	 */
-	public Marker[] findMarkers() {
+	public Marker[] findMarkers(boolean toggleDirection) {
 		Marker m1 = null;
 		Marker m2 = null;
+		Mat curImgFrame = activity.getCurrentImgFrame();
 		
 		for(Marker m : markers){
-			m.calculateImgPosition(activity.getCurrentImgFrame());
+			m.calculateImgPosition(curImgFrame);
 			Log.i("MARK", "Marker: " +m.curImgSize);
 			if(m1 == null || m.curImgSize > m1.curImgSize){
 				m1 = m;
@@ -155,9 +172,17 @@ public class Navigator extends Thread implements SubProgramm {
 		if(m1 == null || m2 == null || m1 == m2 || !m1.isInImg() || !m2.isInImg()){
 			// TODO turn and try again
 			Log.i(MainActivity.DEBUG_TAG, "keine zwei punkte in view");
-			// robot.turn(10);
-			// findMarkers()
-			throw new Error("not implemented");
+			
+			if(toggleDirection){
+				curDirection = -2.;
+				robot.turn(2);
+			}else{
+				curDirection = 2.;
+				robot.turn(-4);
+			}
+			
+			robot.waitForFinishedMovement();
+			findMarkers(!toggleDirection);
 		}
 		
 		Marker[] returnMarkers = new Marker[2];
@@ -179,8 +204,8 @@ public class Navigator extends Thread implements SubProgramm {
         Point p2 = m2.getPosition();
 
         double d = Math.sqrt(Math.pow(Math.abs(p1.x - p2.x), 2) + Math.pow(Math.abs(p1.y - p2.y), 2));
-        if (d > r1 + r2)
-            return null;
+        //if (d > r1 + r2)
+            //return null;
 
         double d1 = (Math.pow(r1, 2) - Math.pow(r2, 2) + Math.pow(d, 2))/ (2 * d);
         double h = Math.sqrt(Math.pow(r1, 2) - Math.pow(d1, 2));
@@ -234,9 +259,9 @@ public class Navigator extends Thread implements SubProgramm {
 		
 		double distance = Math.sqrt(xDist * xDist + yDist * yDist); 
 		
-		robot.turn((int) angle);
+		robot.turn((int) - angle);
 		robot.waitForFinishedMovement();
-		curDirection = angle;
+		curDirection = curDirection + angle;
 		
 		robot.moveFoward((int) distance);
 		robot.waitForFinishedMovement();
@@ -249,6 +274,16 @@ public class Navigator extends Thread implements SubProgramm {
 	
 	public Point getVirtualCords(Point p) {
 		return new Point(p.x / factorX, p.y / factorY);
+	}
+	
+
+	
+	public void setChangedPosition(int distance, int angle){
+		this.curDirection += angle;
+		
+		
+		this.curPosition.x += Math.cos(this.curDirection) * distance;
+		this.curPosition.y += Math.sin(this.curDirection) * distance;
 	}
 
 }
