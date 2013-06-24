@@ -12,6 +12,7 @@ import uibk.autonom.ps.activity.MainActivity;
 import uibk.autonom.ps.activity.R;
 import uibk.autonom.ps.activity.SubProgramm;
 import uibk.autonom.ps.robot.Robot;
+import uibk.autonom.ps.selflocalisation.CenterPointProvider;
 import uibk.autonom.ps.selflocalisation.Locator;
 
 public class Navigator extends Thread implements SubProgramm {
@@ -32,6 +33,7 @@ public class Navigator extends Thread implements SubProgramm {
 	
 	private Button next;
 	private Scalar savedColor = null;
+	
 
 	// public enum States{START, SELECT_COLORS, CALIBRATE, };
 	// public States curState = States.START;
@@ -64,7 +66,7 @@ public class Navigator extends Thread implements SubProgramm {
 		Point marker1Pos = locator.img2World(markers[0].curImgPosition);
 		Point marker2Pos = locator.img2World(markers[1].curImgPosition);
 		curPosition = findRobotPosition(markers[0], markers[1], Locator.getDistance(marker1Pos)/factorX, Locator.getDistance(marker2Pos)/factorX);
-		curDirection = findRobotDirection(markers[0], marker1Pos);
+		curDirection = findRobotDirection(markers[0],markers[1], marker1Pos);
 		
 		Log.i(MainActivity.DEBUG_TAG, "curPosition: " + curPosition);
 		// curPos is set
@@ -213,9 +215,17 @@ public class Navigator extends Thread implements SubProgramm {
 	 * @param p
 	 * @return
 	 */
-	public static double findRobotDirection(Marker m, Point p){
+	public double findRobotDirection(Marker m,Marker m2, Point p){
+		Point objectPoint = p;
+		int degree = locator.getAngle(objectPoint);
 		
-		//TODO unused
+		robot.turn(degree);
+		robot.waitForFinishedMovement();
+		
+		double x = m.getPosition().x;
+		double y = m.getPosition().y;
+		
+		
 		
 		return 0;
 	}
