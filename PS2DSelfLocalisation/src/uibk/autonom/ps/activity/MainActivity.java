@@ -21,13 +21,18 @@ import uibk.autonom.ps.selflocalisation.BallCatcher;
 import uibk.autonom.ps.selflocalisation.Calibrator;
 import uibk.autonom.ps.selflocalisation.CenterPointProvider;
 import uibk.autonom.ps.selflocalisation.Locator;
+import uibk.autonom.ps.selflocalisation.SerializeMat;
 import uibk.autonom.ps.activity.R;
 import uibk.autonom.ps.colordetector.ColorDetector;
 import uibk.autonom.ps.colordetector.ColorSelector;
 import uibk.autonom.ps.colordetector.detectors.ColorThresholdDetector;
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
+import android.util.Base64;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -81,6 +86,7 @@ public class MainActivity extends IOIOActivity implements OnTouchListener,
 		}
 	};
 
+	@TargetApi(Build.VERSION_CODES.FROYO)
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
@@ -93,8 +99,17 @@ public class MainActivity extends IOIOActivity implements OnTouchListener,
 		mOpenCvCameraView.setCvCameraViewListener(this);
 
 		colorDetector = new ColorThresholdDetector();
-		locator = new Locator();
-	}
+		locator = new Locator(this);
+		
+		//read calibration settings
+		SharedPreferences settings = getSharedPreferences("caibration", 0);
+		String calibrationString = settings.getString("cv", "error");
+		byte[] calibrationBytes = Base64.decode(calibrationString, Base64.NO_WRAP);
+		Mat calibration = SerializeMat.MatFromByteArray(calibrationBytes);
+		locator.setCalibration(calibration);
+		if(calibration!=null)
+			showMessage("Calibration loaded!");
+		}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
