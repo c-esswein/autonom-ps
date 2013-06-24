@@ -1,29 +1,12 @@
 package uibk.autonom.ps.colordetector;
 
-import android.annotation.TargetApi;
-import android.os.Build;
 import android.util.Log;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.NavigableMap;
-import java.util.TreeMap;
-import java.util.Vector;
-
-import org.opencv.core.Core;
 import org.opencv.core.Mat;
-import org.opencv.core.MatOfPoint;
-import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
 import org.opencv.core.Scalar;
-import org.opencv.imgproc.Imgproc;
 
 import uibk.autonom.ps.activity.MainActivity;
 import uibk.autonom.ps.colordetector.detectors.ColorThresholdDetector;
-import uibk.autonom.ps.navigation.Navigator;
 
 public class ColorCodeDetector {
 
